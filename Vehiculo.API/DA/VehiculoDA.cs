@@ -1,38 +1,93 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Abstracciones.Interfaces.DA;
+﻿using Abstracciones.Interfaces.DA;
 using Abstracciones.Modelos;
+using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace DA
 {
     public class VehiculoDA : IVehiculoDA
     {
-        public Task<Guid> Actualizar(Guid id, VehiculoRequest vehiculo)
+        private IRepositorioDapper _repositorioDapper;
+        private SqlConnection _sqlConnection;
+
+        public VehiculoDA(IRepositorioDapper repositorioDapper)
         {
-            throw new NotImplementedException();
+            _repositorioDapper = repositorioDapper;
+            _sqlConnection = _repositorioDapper.ObtenerRepositorio();
         }
 
-        public Task<Guid> Agregar(VehiculoRequest vehiculo)
+        #region Consultas
+        public async Task<Guid> Actualizar(Guid Id, VehiculoRequest vehiculo)
         {
-            throw new NotImplementedException();
+            await verificarVehiculoExiste(Id);
+            string query = @"EditarVehiculo";
+            var resultadoConsulta = await _sqlConnection.ExecuteScalarAsync<Guid>(query, new
+            {
+                Id = Id,
+                IdModelo = vehiculo.IdModelo,
+                Placa = vehiculo.Placa,
+                Color = vehiculo.Color,
+                Anio = vehiculo.Anio,
+                Precio = vehiculo.Precio,
+                CorreoPropietario = vehiculo.CorreoPropietario,
+                TelefonoPropietario = vehiculo.TelefonoPropietario
+            });
+            return resultadoConsulta;
         }
 
-        public Task<Guid> Eliminar(Guid id)
+        public async Task<Guid> Agregar(VehiculoRequest vehiculo)
         {
-            throw new NotImplementedException();
+            string query = @"AgregarVehiculo";
+            var resultadoConsulta = await _sqlConnection.ExecuteScalarAsync<Guid>(query, new
+            {
+                Id = Guid.NewGuid(),
+                IdModelo = vehiculo.IdModelo,
+                Placa = vehiculo.Placa,
+                Color = vehiculo.Color,
+                Anio = vehiculo.Anio,
+                Precio = vehiculo.Precio,
+                CorreoPropietario = vehiculo.CorreoPropietario,
+                TelefonoPropietario = vehiculo.TelefonoPropietario
+            });
+            return resultadoConsulta;
         }
 
-        public Task<IEnumerable<VehiculoResponse>> Obtener()
+        public async Task<Guid> Eliminar(Guid Id)
         {
-            throw new NotImplementedException();
+            await verificarVehiculoExiste(Id);
+            string query = @"EliminarVehiculo";
+            var resultadoConsulta = await _sqlConnection.ExecuteScalarAsync<Guid>(query, new
+            {
+                Id = Id
+            });
+            return resultadoConsulta;
         }
 
-        public Task<VehiculoResponse> Obtener(Guid id)
+        public async Task<IEnumerable<VehiculoResponse>> Obtener()
         {
-            throw new NotImplementedException();
+            string query = @"ObtenerVehiculos";
+            var resultadoConsulta = await _sqlConnection.QueryAsync<VehiculoResponse>(query);
+            return resultadoConsulta;
         }
+
+        public async Task<VehiculoDetalle> ObtenerPorID(Guid Id)
+        {
+            string query = @"ObtenerVehiculo";
+            var resultadoConsulta = await _sqlConnection.QueryAsync<VehiculoDetalle>(query, new { Id = Id });
+            var vehiculo = resultadoConsulta.FirstOrDefault();
+            if (vehiculo == null)
+                throw new Exception("No se encontró el vehículo");
+            return vehiculo;
+        }
+        #endregion
+
+        #region Helpers
+        private async Task verificarVehiculoExiste(Guid Id)
+        {
+            VehiculoResponse? resultadoConsultaVehiculo = await ObtenerPorID(Id);
+            if (resultadoConsultaVehiculo == null)
+                throw new Exception("No se encontró el vehículo");
+        }
+        #endregion
     }
 }

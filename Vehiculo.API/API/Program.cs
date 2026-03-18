@@ -1,8 +1,14 @@
 using Abstracciones.Interfaces.DA;
 using Abstracciones.Interfaces.Flujo;
+using Abstracciones.Interfaces.Reglas;
+using Abstracciones.Interfaces.Servicios;
+using Abstracciones.Modelos;
 using DA;
 using DA.Repositories;
 using Flujo;
+using Microsoft.Extensions.Configuration;
+using Reglas;
+using Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +18,23 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IVehiculoFlujo, VehiculoFlujo>();
 builder.Services.AddScoped<IVehiculoDA, VehiculoDA>();
 builder.Services.AddScoped<IRepositorioDapper, RepositorioDapper>();
+
+builder.Services.AddScoped<IRegistroServicio, RegistroServicio>();
+builder.Services.AddScoped<IRevisionServicio, RevisionServicio>();
+builder.Services.AddScoped<IConfiguracion, Configuracion>();
+builder.Services.AddScoped<IRegistroReglas, RegistroReglas>();
+builder.Services.AddScoped<IRevisionReglas, RevisionReglas>();
+
+
+builder.Services.AddScoped<IMarcaFlujo, MarcaFlujo>();
+builder.Services.AddScoped<IModeloFlujo, ModeloFlujo>();
+builder.Services.AddScoped<IMarcaDA, MarcaDA>();
+builder.Services.AddScoped<IModeloDA, ModeloDA>();
 
 
 var app = builder.Build();

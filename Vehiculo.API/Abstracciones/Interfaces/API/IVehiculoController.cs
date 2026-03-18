@@ -6,9 +6,13 @@ namespace Abstracciones.Interfaces.API
     public interface IVehiculoController
     {
         Task<IActionResult> Obtener();
-        Task<IActionResult> Obtener(Guid id);
+
+        Task<IActionResult> ObtenerPorID(Guid Id);
+
         Task<IActionResult> Agregar(VehiculoRequest vehiculo);
-        Task<IActionResult> Actualizar(Guid id, VehiculoRequest vehiculo);
-        Task<IActionResult> Eliminar(Guid id);
+
+        Task<IActionResult> Actualizar(Guid Id, VehiculoRequest vehiculo);
+
+        Task<IActionResult> Eliminar(Guid Id);
     }
 }

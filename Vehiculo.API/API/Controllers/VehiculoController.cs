@@ -1,7 +1,6 @@
 ﻿using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Flujo;
 using Abstracciones.Modelos;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -18,24 +17,34 @@ namespace API.Controllers
             _vehiculoFlujo = vehiculoFlujo;
             _logger = logger;
         }
+
+        #region Operaciones CRUD
+
+        [HttpPut("{Id}")]
+        public async Task<IActionResult> Actualizar([FromRoute] Guid Id, [FromBody] VehiculoRequest vehiculo)
+        {
+            if (!await VerificarVehiculoExiste(Id))
+                return NotFound("El vehículo no exite");
+            var resultado = await _vehiculoFlujo.Actualizar(Id, vehiculo);
+            return Ok(resultado);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Agregar(VehiculoRequest vehiculo)
+        public async Task<IActionResult> Agregar([FromBody] VehiculoRequest vehiculo)
         {
             var resultado = await _vehiculoFlujo.Agregar(vehiculo);
             return CreatedAtAction(nameof(Obtener), new { Id = resultado }, null);
         }
-        [HttpPut("{Id}")]
-        public async Task<IActionResult> Actualizar(Guid Id, VehiculoRequest vehiculo)
-        {
-            var resultado = await _vehiculoFlujo.Actualizar(Id, vehiculo);
-            return Ok(resultado);
-        }
+
         [HttpDelete("{Id}")]
-        public async Task<IActionResult> Eliminar(Guid Id)
+        public async Task<IActionResult> Eliminar([FromRoute] Guid Id)
         {
+            if (!await VerificarVehiculoExiste(Id))
+                return NotFound("El vehículo no exite");
             var resultado = await _vehiculoFlujo.Eliminar(Id);
             return NoContent();
         }
+
         [HttpGet]
         public async Task<IActionResult> Obtener()
         {
@@ -44,11 +53,23 @@ namespace API.Controllers
                 return NoContent();
             return Ok(resultado);
         }
+
         [HttpGet("{Id}")]
-        public async Task<IActionResult> Obtener(Guid Id)
+        public async Task<IActionResult> ObtenerPorID([FromRoute] Guid Id)
         {
-            var resultado = await _vehiculoFlujo.Obtener(Id);
+            var resultado = await _vehiculoFlujo.ObtenerPorID(Id);
             return Ok(resultado);
+        }
+
+        #endregion
+        private async Task<bool> VerificarVehiculoExiste(Guid Id)
+        {
+            var resultadoValidacion = false;
+            var resultadoVehiculoExiste = await _vehiculoFlujo.ObtenerPorID(Id);
+            if (resultadoVehiculoExiste != null)
+                resultadoValidacion = true;
+            return resultadoValidacion;
+
         }
     }
 }
