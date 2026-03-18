@@ -1,0 +1,40 @@
+﻿@page
+@model Web.Pages.Vehiculos.IndexModel
+@{
+}
+
+<div class="text-center">
+    <h2 class="section-heading text-uppercase">vehículos registrados</h2>
+</div>
+<div class="text-end">
+    <a class="btn btn-success mb-5" asp-page="./Agregar">Agregar</a>
+</div>
+<div class="container">
+<div class="row">
+ @if (Model.vehiculos != null)
+        foreach (var vehiculo in Model.vehiculos)
+        {
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">
+                            @vehiculo.Marca @vehiculo.Modelo
+                        </h5>
+
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            @vehiculo.Anio
+                        </h6>
+
+                        <p class="card-text mb-3">
+                            <strong>Placa:</strong> @vehiculo.Placa
+                        </p>
+
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-primary" asp-page="./Detalle" asp-route-id="@vehiculo.Id">Detalle</a>
+                            <a class="btn btn-sm btn-warning text-white" asp-page="./Editar" asp-route-id="@vehiculo.Id">Editar</a>
+                            <a class="btn btn-sm btn-danger" asp-page="./Eliminar" asp-route-id="@vehiculo.Id">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+</div>
